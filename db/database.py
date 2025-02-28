@@ -1,4 +1,3 @@
-# db/database.py
 import psycopg2
 from psycopg2.extras import execute_values
 from config import Config

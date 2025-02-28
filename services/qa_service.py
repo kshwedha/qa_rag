@@ -2,6 +2,7 @@ import os
 import re
 import numpy as np
 from PyPDF2 import PdfReader
+from custom_logger import logger
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer
 import ollama, openai
@@ -136,6 +137,7 @@ class QuestionAnsweringService:
             dict: Answer with metadata
         """
         # Get question embedding
+        logger.info("reading question.")
         question_embedding = self.sentence_transformer.encode(question)
         
         # Search for similar chunks
@@ -170,8 +172,10 @@ class QuestionAnsweringService:
         source_docs.sort(key=lambda x: x["similarity"], reverse=True)
         
         if os.environ.get("GENERAL"):
-            return generate_answer_llm(question, context, source_docs)
-        return generate_answer(question, context, source_docs)
+            logger.info("generating answer via general.")
+            return self.generate_answer_llm(question, context, source_docs)
+        logger.info("generating answer via model.")
+        return self.generate_answer_model(question, context, source_docs)
     
     def generate_answer_pipeline(self, question, context, source_docs):
         # Use QA model to find answer in context
@@ -184,8 +188,8 @@ class QuestionAnsweringService:
             "sources": source_docs
         }
 
-    def generate_answer_model(question, context, source_docs):
-        prompt = f"Using the following context, answer the question:\n\nContext: {context}\n\nQuestion: {query}\n\nAnswer:"
+    def generate_answer_model(self, question, context, source_docs):
+        prompt = f"Using the following context, answer the question:\n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
         if os.environ.get("ollama", False):
             response = ollama.chat(model=os.environ.get("ollama_model"), messages=[{"role": "user", "content": prompt}])
         else:
