@@ -1,0 +1,57 @@
+(vpython) maath@pg-22fd96c2-maathmanjunathleo-dc02 RAG % python -m unittest discover -s tests
+/Users/maath/Desktop/binaryLove/assessments/RAG/vpython/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+2025-03-04 00:08:29,466 - app - INFO - Registering adapters
+/Users/maath/Desktop/binaryLove/assessments/RAG/vpython/lib/python3.9/site-packages/flask_limiter/extension.py:333: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+2025-03-04 00:08:29,481 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:30,492 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+..2025-03-04 00:08:33,711 - app - INFO - document 1 deleted.
+.2025-03-04 00:08:33,713 - app - INFO - returning document 1
+.2025-03-04 00:08:33,714 - app - INFO - listing documents
+.2025-03-04 00:08:33,733 - app - INFO - Processing PDF: ./uploads/manual-testing.pdf
+2025-03-04 00:08:33,830 - app - INFO - extracting pdf text
+2025-03-04 00:08:37,355 - app - INFO - creating doc record
+2025-03-04 00:08:37,470 - app - INFO - creating chunks
+2025-03-04 00:08:37,470 - app - INFO - Create embeddings for chunks
+2025-03-04 00:08:37,589 - app - INFO - Store chunks and embeddings
+2025-03-04 00:08:37,663 - app - INFO - PDF processed and stored successfully. Document ID: 26e1b2e9-18b2-470e-b378-7297d6a947c3
+2025-03-04 00:08:37,663 - app - INFO - Document saved.
+......2025-03-04 00:08:37,672 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:38,287 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-04 00:08:41,501 - app - INFO - reading question.
+2025-03-04 00:08:41,502 - app - INFO - question: What is Quality?
+2025-03-04 00:08:41,502 - app - INFO - doc id: 12345
+.2025-03-04 00:08:41,618 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:42,218 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-04 00:08:45,019 - app - INFO - reading question.
+2025-03-04 00:08:45,020 - app - INFO - question: What is Quality?
+2025-03-04 00:08:45,020 - app - INFO - doc id: None
+.2025-03-04 00:08:45,038 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:45,625 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+.2025-03-04 00:08:48,180 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:48,768 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-04 00:08:51,791 - app - INFO - Error: File non_existing_file.pdf not found
+.2025-03-04 00:08:51,796 - app - INFO - Loading QA model: deepset/roberta-base-squad2
+Device set to use mps:0
+2025-03-04 00:08:52,289 - app - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-03-04 00:08:54,976 - app - INFO - Processing PDF: ./uploads/manual-testing.pdf
+2025-03-04 00:08:55,074 - app - INFO - extracting pdf text
+/Users/maath/Desktop/binaryLove/assessments/RAG/vpython/lib/python3.9/site-packages/PyPDF2/_reader.py:1094: ResourceWarning: unclosed file <_io.BufferedRandom name=14>
+  NameObject(PG.ROTATE),
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+2025-03-04 00:08:58,526 - app - INFO - creating doc record
+2025-03-04 00:08:58,526 - app - INFO - creating chunks
+2025-03-04 00:08:58,526 - app - INFO - Create embeddings for chunks
+2025-03-04 00:08:58,554 - app - INFO - Store chunks and embeddings
+2025-03-04 00:08:58,554 - app - INFO - PDF processed and stored successfully. Document ID: 12345
+.
+----------------------------------------------------------------------
+Ran 16 tests in 24.853s
+
+OK

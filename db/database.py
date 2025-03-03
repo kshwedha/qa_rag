@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2.extras import execute_values
 from config import Config
+from custom_logger import logger
 
 def get_db_connection():
     """Create a new database connection"""
@@ -30,9 +31,11 @@ def initialize_database():
                     metadata JSONB
                 );
             """)
+
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             
             # Get embedding dimension from config
-            embedding_dim = 384  # Default for all-MiniLM-L6-v2
+            embedding_dim = 1536  # Default for all-MiniLM-L6-v2
             
             # Create chunks table with vector support
             cur.execute(f"""
@@ -53,9 +56,9 @@ def initialize_database():
             """)
             
         conn.commit()
-        print("Database initialized successfully")
+        logger.info("Database initialized successfully")
     except Exception as e:
         conn.rollback()
-        print(f"Error initializing database: {e}")
+        logger.info(f"Error initializing database: {e}")
     finally:
         conn.close()

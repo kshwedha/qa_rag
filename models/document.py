@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 import uuid
 from db.database import get_db_connection
+from custom_logger import logger
 
 class DocumentModel:
     """Model for document operations in the database"""
@@ -36,7 +37,7 @@ class DocumentModel:
         except Exception as e:
             if conn:
                 conn.rollback()
-            print(f"Error creating document: {e}")
+            logger.info(f"Error creating document: {e}")
             return None
         finally:
             if conn:
@@ -62,7 +63,7 @@ class DocumentModel:
                 document = cur.fetchone()
             return dict(document) if document else None
         except Exception as e:
-            print(f"Error retrieving document: {e}")
+            logger.info(f"Error retrieving document: {e}")
             return None
         finally:
             if conn:
@@ -84,7 +85,7 @@ class DocumentModel:
                 documents = cur.fetchall()
             return [dict(doc) for doc in documents]
         except Exception as e:
-            print(f"Error listing documents: {e}")
+            logger.info(f"Error listing documents: {e}")
             return []
         finally:
             if conn:
@@ -110,7 +111,7 @@ class DocumentModel:
         except Exception as e:
             if conn:
                 conn.rollback()
-            print(f"Error deleting document: {e}")
+            logger.info(f"Error deleting document: {e}")
             return False
         finally:
             if conn:

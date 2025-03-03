@@ -5,7 +5,8 @@ from PyPDF2 import PdfReader
 from custom_logger import logger
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer
-import ollama, openai
+from custom_logger import logger
+# import ollama, openai
 
 class QuestionAnsweringService:
     """Service for PDF processing and question answering"""
@@ -24,10 +25,10 @@ class QuestionAnsweringService:
         self.embedding_model = embedding_model
         
         # Load NLP models
-        print(f"Loading QA model: {qa_model_name}")
+        logger.info(f"Loading QA model: {qa_model_name}")
         self.qa_pipeline = pipeline('question-answering', model=qa_model_name)
         
-        print(f"Loading embedding model: {embedding_model_name}")
+        logger.info(f"Loading embedding model: {embedding_model_name}")
         self.sentence_transformer = SentenceTransformer(embedding_model_name)
         
         # Configuration
@@ -46,14 +47,15 @@ class QuestionAnsweringService:
             str: Document ID if successful, None otherwise
         """
         if not os.path.exists(pdf_path):
-            print(f"Error: File {pdf_path} not found")
+            logger.info(f"Error: File {pdf_path} not found")
             return None
             
         try:
-            print(f"Processing PDF: {pdf_path}")
+            logger.info(f"Processing PDF: {pdf_path}")
             reader = PdfReader(pdf_path)
             
             # Extract text from PDF
+            logger.info("extracting pdf text")
             full_text = ""
             for page in reader.pages:
                 text = page.extract_text()
@@ -63,38 +65,42 @@ class QuestionAnsweringService:
             full_text = re.sub(r'\s+', ' ', full_text).strip()
             
             if not full_text:
-                print("Error: No text content extracted from PDF")
+                logger.info("Error: No text content extracted from PDF")
                 return None
             
             # Create document record
+            logger.info("creating doc record")
             title = os.path.basename(pdf_path)
             doc_id = self.document_model.create(title, pdf_path, metadata)
             
             if not doc_id:
-                print("Error: Failed to create document record")
+                logger.info("Error: Failed to create document record")
                 return None
             
             # Generate chunks
+            logger.info("creating chunks")
             chunks = self._create_chunks(full_text)
             if not chunks:
-                print("Error: Failed to create text chunks")
+                logger.info("Error: Failed to create text chunks")
                 self.document_model.delete(doc_id)
                 return None
             
             # Create embeddings for chunks
+            logger.info("Create embeddings for chunks")
             embeddings = self.sentence_transformer.encode(chunks)
             
             # Store chunks and embeddings
+            logger.info("Store chunks and embeddings")
             if not self.embedding_model.create_chunks(doc_id, chunks, embeddings):
-                print("Error: Failed to store chunks and embeddings")
+                logger.info("Error: Failed to store chunks and embeddings")
                 self.document_model.delete(doc_id)
                 return None
             
-            print(f"PDF processed and stored successfully. Document ID: {doc_id}")
+            logger.info(f"PDF processed and stored successfully. Document ID: {doc_id}")
             return doc_id
             
         except Exception as e:
-            print(f"Error processing PDF: {e}")
+            logger.info(f"Error processing PDF: {e}")
             return None
     
     def _create_chunks(self, text):
@@ -118,10 +124,11 @@ class QuestionAnsweringService:
                     space = text.rfind(" ", start, end)
                     if space > start + self.chunk_size // 2:
                         end = space
-            
+
             chunks.append(text[start:end].strip())
             start += (end - start) - self.overlap
-            
+            if start+self.overlap == end:
+                break
         return chunks
     
     def answer_question(self, question, doc_id=None, top_k=5):
@@ -138,6 +145,8 @@ class QuestionAnsweringService:
         """
         # Get question embedding
         logger.info("reading question.")
+        logger.info(f"question: {question}")
+        logger.info(f"doc id: {doc_id}")
         question_embedding = self.sentence_transformer.encode(question)
         
         # Search for similar chunks
@@ -171,11 +180,12 @@ class QuestionAnsweringService:
         # Sort sources by similarity
         source_docs.sort(key=lambda x: x["similarity"], reverse=True)
         
-        if os.environ.get("GENERAL"):
-            logger.info("generating answer via general.")
-            return self.generate_answer_llm(question, context, source_docs)
-        logger.info("generating answer via model.")
-        return self.generate_answer_model(question, context, source_docs)
+        return self.generate_answer_pipeline(question, context, source_docs)
+        # if os.environ.get("GENERAL"):
+            # logger.info("generating answer via general.")
+            # return self.generate_answer_pipeline(question, context, source_docs)
+        # logger.info("generating answer via model.")
+        # return self.generate_answer_model(question, context, source_docs)
     
     def generate_answer_pipeline(self, question, context, source_docs):
         # Use QA model to find answer in context
@@ -188,15 +198,15 @@ class QuestionAnsweringService:
             "sources": source_docs
         }
 
-    def generate_answer_model(self, question, context, source_docs):
-        prompt = f"Using the following context, answer the question:\n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
-        if os.environ.get("ollama", False):
-            response = ollama.chat(model=os.environ.get("ollama_model"), messages=[{"role": "user", "content": prompt}])
-        else:
-            response = openai.ChatCompletion.create(model=os.environ.get("gpt_model"), messages=[{"role": "user", "content": prompt}])
-        return {
-            "answer": response["choices"][0]["message"]["content"],
-            "confidence": float("inf"),
-            "context": context,
-            "sources": source_docs
-        }
+    # def generate_answer_model(self, question, context, source_docs):
+    #     prompt = f"Using the following context, answer the question:\n\nContext: {context}\n\nQuestion: {question}\n\nAnswer:"
+    #     if os.environ.get("ollama", False):
+    #         response = ollama.chat(model=os.environ.get("ollama_model"), messages=[{"role": "user", "content": prompt}])
+    #     else:
+    #         response = openai.ChatCompletion.create(model=os.environ.get("gpt_model"), messages=[{"role": "user", "content": prompt}])
+    #     return {
+    #         "answer": response["choices"][0]["message"]["content"],
+    #         "confidence": float("inf"),
+    #         "context": context,
+    #         "sources": source_docs
+    #     }

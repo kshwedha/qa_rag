@@ -1,7 +1,9 @@
+import numpy as np
 import psycopg2
 from psycopg2.extras import execute_values, RealDictCursor
 import uuid
 from db.database import get_db_connection
+from custom_logger import logger
 
 class EmbeddingModel:
     """Model for embedding operations in the database"""
@@ -21,7 +23,7 @@ class EmbeddingModel:
             bool: True if successful, False otherwise
         """
         if len(chunks) != len(embeddings):
-            print("Error: Number of chunks and embeddings must match")
+            logger.info("Error: Number of chunks and embeddings must match")
             return False
         
         conn = None
@@ -47,7 +49,7 @@ class EmbeddingModel:
         except Exception as e:
             if conn:
                 conn.rollback()
-            print(f"Error storing chunks: {e}")
+            logger.info(f"Error storing chunks: {e}")
             return False
         finally:
             if conn:
@@ -67,26 +69,28 @@ class EmbeddingModel:
         conn = None
         try:
             conn = get_db_connection()
+            embedding = embedding.tolist()
+
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 if doc_id:
                     # Search only within the specified document
                     cur.execute("""
                         SELECT c.chunk_id, c.text_content, d.doc_id, d.title, 
-                               1 - (c.embedding <=> %s) as similarity
+                               1 - (c.embedding <=> %s::vector) as similarity
                         FROM chunks c
                         JOIN documents d ON c.doc_id = d.doc_id
                         WHERE d.doc_id = %s
-                        ORDER BY c.embedding <=> %s
+                        ORDER BY c.embedding <=> %s::vector
                         LIMIT %s;
                     """, (embedding, doc_id, embedding, top_k))
                 else:
                     # Search across all documents
                     cur.execute("""
                         SELECT c.chunk_id, c.text_content, d.doc_id, d.title, 
-                               1 - (c.embedding <=> %s) as similarity
+                               1 - (c.embedding <=> %s::vector) as similarity
                         FROM chunks c
                         JOIN documents d ON c.doc_id = d.doc_id
-                        ORDER BY c.embedding <=> %s
+                        ORDER BY c.embedding <=> %s::vector
                         LIMIT %s;
                     """, (embedding, embedding, top_k))
                 
@@ -94,7 +98,7 @@ class EmbeddingModel:
             
             return [dict(result) for result in results]
         except Exception as e:
-            print(f"Error searching similar chunks: {e}")
+            logger.info(f"Error searching similar chunks: {e}")
             return []
         finally:
             if conn:
@@ -119,7 +123,7 @@ class EmbeddingModel:
         except Exception as e:
             if conn:
                 conn.rollback()
-            print(f"Error deleting chunks: {e}")
+            logger.info(f"Error deleting chunks: {e}")
             return False
         finally:
             if conn:

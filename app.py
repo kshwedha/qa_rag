@@ -8,15 +8,17 @@ from services.qa_service import QuestionAnsweringService
 from flask_limiter.util import get_remote_address
 from flask_limiter import Limiter
 from custom_logger import logger
+import init
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
 
 limiter = Limiter(
-    app,
-    key_func=get_remote_address,
+    key_func=get_remote_address,  # No app argument here
     default_limits=["200 per day", "50 per hour"]
 )
+
+limiter.init_app(app=app)
 
 # Create upload folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

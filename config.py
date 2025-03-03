@@ -1,12 +1,15 @@
 import os
+from dotenv import load_dotenv
 
 class Config:
     """Application configuration"""
+
+    load_dotenv()
     
     # Flask settings
     DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-    HOST = os.environ.get('HOST', '0.0.0.0')
-    PORT = int(os.environ.get('PORT', 5000))
+    HOST = os.environ.get('FLASK_HOST', '0.0.0.0')
+    PORT = int(os.environ.get('FLASK_PORT', 5000))
     
     # Upload settings
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'uploads')
@@ -16,7 +19,7 @@ class Config:
     DB_HOST = os.environ.get('HOST', 'localhost')
     DB_PORT = int(os.environ.get('PORT', 5432))
     DB_NAME = os.environ.get('NAME', 'defaultdb')
-    DB_USER = os.environ.get('USER', 'postgres')
+    DB_USER = os.environ.get('DBUSER', 'postgres')
     DB_PASSWORD = os.environ.get('PASSWORD', 'postgres')
     
     # Model settings
